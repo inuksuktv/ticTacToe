@@ -1,5 +1,3 @@
-console.log("Hello world!");
-
 function Gameboard() {
   const rows = 3;
   const columns = 3;
@@ -78,6 +76,8 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     );
     board.claimCell(row, column, getActivePlayer());
 
+    // Todo: check victory condition.
+
     switchPlayerTurn();
     printNewRound();
   };
@@ -85,10 +85,54 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
   // Initial game state.
   printNewRound();
 
-  return { playRound, getActivePlayer };
+  return {
+    playRound,
+    getActivePlayer,
+    getBoard: board.getBoard
+  };
 }
 
-const game = GameController();
-game.playRound(1, 1);
-game.playRound(0, 0);
-game.playRound(0, 0);
+function ScreenController() {
+  const game = GameController();
+  const playerTurnDiv = document.querySelector('.turn');
+  const boardDiv = document.querySelector('.board');
+
+  const updateScreen = () => {
+    // Clear the board.
+    boardDiv.textContent = "";
+
+    const board = game.getBoard();
+    const activePlayer = game.getActivePlayer();
+
+    playerTurnDiv.textContent = `${activePlayer.name}'s turn`;
+
+    // Render board cells.
+    board.forEach((row, rowIndex) => {
+      row.forEach((cell, columnIndex) => {
+        const cellButton = document.createElement("button");
+        cellButton.classList.add("cell");
+        // Store the cell coordinates so we can link the UI to the game logic.
+        cellButton.dataset.row = rowIndex;
+        cellButton.dataset.column = columnIndex;
+        cellButton.textContent = cell.getValue();
+        boardDiv.appendChild(cellButton);
+      })
+    })
+  }
+
+  function clickHandlerBoard(e) {
+    const selectedCell = e.target;
+    const row = selectedCell.dataset.row;
+    const column = selectedCell.dataset.column;
+    // Guard clause to make sure the user clicked a cell.
+    if (!row) return;
+
+    game.playRound(row, column);
+    updateScreen();
+  }
+  boardDiv.addEventListener('click', clickHandlerBoard);
+
+  updateScreen();
+}
+
+ScreenController();
