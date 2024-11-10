@@ -22,12 +22,7 @@ function Gameboard() {
     cell.markCell(player.token);
   };
 
-  const printBoard = () => {
-    const boardWithCellValues = board.map((row) => row.map((cell) => cell.getValue()));
-    console.log(boardWithCellValues);
-  };
-
-  return { getBoard, claimCell, printBoard };
+  return { getBoard, claimCell };
 }
 
 function Cell() {
@@ -64,26 +59,13 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
 
   const getActivePlayer = () => activePlayer;
 
-  // For now, the game is played in the console.
-  const printNewRound = () => {
-    board.printBoard();
-    console.log(`It's ${getActivePlayer().name}'s turn.`)
-  }
-
   const playRound = (row, column) => {
-    console.log(
-      `Placing ${getActivePlayer().name}'s token at row ${row}, column ${column}.`
-    );
     board.claimCell(row, column, getActivePlayer());
 
     // Todo: check victory condition.
 
     switchPlayerTurn();
-    printNewRound();
   };
-
-  // Initial game state.
-  printNewRound();
 
   return {
     playRound,
