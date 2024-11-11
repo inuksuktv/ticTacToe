@@ -14,12 +14,8 @@ function Gameboard() {
 
   const getBoard = () => board;
 
-  const claimCell = (row, column, player) => {
-    const cell = board[row][column];
-    // Guard clause for cells that are already claimed.
-    if (cell.getValue() !== "") return;
-
-    cell.markCell(player.token);
+  const claimCell = (row, column, token) => {
+    board[row][column].markCell(token);
   };
 
   return { getBoard, claimCell };
@@ -60,7 +56,11 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
   const getActivePlayer = () => activePlayer;
 
   const playRound = (row, column) => {
-    board.claimCell(row, column, getActivePlayer());
+    const gameboard = board.getBoard();
+    // Guard clause to handle clicks on already claimed cells.
+    if (gameboard[row][column].getValue() !== "") return;
+
+    board.claimCell(row, column, getActivePlayer().token);
 
     // Todo: check victory condition.
 
