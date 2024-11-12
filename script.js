@@ -75,7 +75,8 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
 
     if (winner !== null) {
       callback(winner.name + " wins!");
-    } else if (isTie) {
+    }
+    else if (isTie) {
       callback("It's a tie!");
     }
   }
@@ -88,19 +89,10 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     const columnWins = isWinningColumn(gameboard, column);
     const diagonalWins = isWinningDiagonal(gameboard);
     
-    let winningToken = null;
-    if (rowWins) { winningToken = gameboard[row][0].getValue(); }
-    else if (columnWins) { winningToken = gameboard[0][column].getValue(); }
-    else if (diagonalWins) { winningToken = gameboard[1][1].getValue(); }
-    
-    if (winningToken !== null) {
-      if (winningToken === players[0].token) {
-        winner = players[0];
-      }
-      else if (winningToken === players[1].token) {
-        winner = players[1];
-      }
+    if (rowWins || columnWins || diagonalWins) {
+      winner = activePlayer;
     }
+
     return winner;
   }
 

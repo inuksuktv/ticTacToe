@@ -1,3 +1,32 @@
+body {
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.turn {
+  text-align: center;
+}
+
+.playArea {
+  display: flex;
+}
+
+.playerCard {
+  align-self: center;
+  margin: 2rem;
+}
+
+.playerCard h2 {
+  text-align: center;
+}
+
 .board {
     display: grid;
     height: 500px;
@@ -19,4 +48,14 @@
     border: 1px solid grey;
     background: lightyellow;
     cursor: pointer;
+  }
+
+  .cell:hover {
+    background-color: rgb(255, 255, 180);
+  }
+
+  .restart {
+    height: 2rem;
+    margin: 2rem;
+    width: 10rem;
   }
