@@ -61,14 +61,13 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     if (gameboard[row][column].getValue() !== "") return;
 
     board.claimCell(row, column, getActivePlayer().token);
-    checkVictoryAndHandle(onVictoryOrTie);
+    checkVictoryAndHandle(row, column, onVictoryOrTie);
     switchPlayerTurn();
   };
 
-  const checkVictoryAndHandle = (callback) => {
-    const gameboard = board.getBoard();
-    const winner = checkForWinner(gameboard);
-    const isTie = isBoardFull(gameboard);
+  const checkVictoryAndHandle = (row, column, callback) => {
+    const winner = checkForWinner(row, column);
+    const isTie = isBoardFull();
 
     if (winner !== null) {
       callback(winner.name + " wins!");
@@ -77,70 +76,55 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     }
   }
 
-  const checkForWinner = (gameboard) => {
+  const checkForWinner = (row, column) => {
+    const gameboard = board.getBoard();
     let winner = null;
-    let winningRow = null;
-    let winningColumn = null;
-    let winningDiagonal = null;
-    // Check rows for a winner.
-    for (let i = 0; i < 3; i++) {
-      if (
-        (gameboard[i][0].getValue() !== "") &&
-        (gameboard[i][0].getValue() === gameboard[i][1].getValue()) &&
-        (gameboard[i][0].getValue() === gameboard[i][2].getValue())
-      ) {
-        winningRow = i;
-      }
-    }
-    // Check columns for a winner.
-    for (let j = 0; j < 3; j++) {
-      if (
-        (gameboard[0][j].getValue() !== "") &&
-        (gameboard[0][j].getValue() === gameboard[1][j].getValue()) &&
-        (gameboard[0][j].getValue() === gameboard[2][j].getValue())
-      ) {
-        winningColumn = j;
-      }
-    }
-    // Check diagonals
-    if (
-      (gameboard[0][0].getValue() !== "") &&
-      (gameboard[0][0].getValue() === gameboard[1][1].getValue()) &&
-      (gameboard[0][0].getValue() === gameboard[2][2].getValue())
-    ) {
-      winningDiagonal = 1;
-    }
-    else if (
-      (gameboard[0][2].getValue() !== "") &&
-      (gameboard[0][2].getValue() === gameboard[1][1].getValue()) &&
-      (gameboard[0][2].getValue() === gameboard[2][0].getValue())
-    ) {
-      winningDiagonal = 2;
-    }
-    let winningToken;
-    if (winningRow !== null) {
-      winningToken = gameboard[winningRow][0].getValue();
-    }
-    else if (winningColumn !== null) {
-      winningToken = gameboard[0][winningColumn].getValue();
-    }
-    else if (winningDiagonal !== null) {
-      winningToken = gameboard[1][1]
-    }
+
+    const rowWins = isWinningRow(gameboard, row);
+    const columnWins = isWinningColumn(gameboard, column);
+    const diagonalWins = isWinningDiagonal(gameboard);
+    
+    let winningToken = null;
+    if (rowWins) { winningToken = gameboard[row][0].getValue(); }
+    else if (columnWins) { winningToken = gameboard[0][column].getValue(); }
+    else if (diagonalWins) { winningToken = gameboard[1][1].getValue(); }
+    
     if (winningToken !== null) {
-      if (winningToken === "X") {
+      if (winningToken === players[0].token) {
         winner = players[0];
       }
-      else if (winningToken === "O") {
+      else if (winningToken === players[1].token) {
         winner = players[1];
       }
     }
     return winner;
   }
 
-  const isBoardFull = (gameboard) => {
+  const isWinningRow = (board, row) => {
+    return (board[row][0].getValue() !== "") &&
+    (board[row][0].getValue() === board[row][1].getValue()) &&
+    (board[row][0].getValue() === board[row][2].getValue());
+  }
+
+  const isWinningColumn = (board, column) => {
+    return (board[0][column].getValue() !== "") &&
+    (board[0][column].getValue() === board[1][column].getValue()) &&
+    (board[0][column].getValue() === board[2][column].getValue())
+  }
+
+  const isWinningDiagonal = (gameboard) => {
+    return ((gameboard[0][0].getValue() !== "") &&
+    (gameboard[0][0].getValue() === gameboard[1][1].getValue()) &&
+    (gameboard[0][0].getValue() === gameboard[2][2].getValue())) ||
+    ((gameboard[0][2].getValue() !== "") &&
+    (gameboard[0][2].getValue() === gameboard[1][1].getValue()) &&
+    (gameboard[0][2].getValue() === gameboard[2][0].getValue()));
+  }
+
+  const isBoardFull = () => {
+    const gameboard = board.getBoard();
     let isFull = true;
-    // Check if each cell has a token.
+    // If there's a cell without a token, the board is not full.
     gameboard.forEach((row, rowIndex) => {
       row.forEach((column, columnIndex) => {
         if (gameboard[rowIndex][columnIndex].getValue() === "") {
