@@ -136,10 +136,20 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     activePlayer = players[0];
   }
 
+  const renamePlayer = (player, newName) => {
+    if (player === 1) {
+      players[0].name = newName;
+    }
+    else if (player === 2) {
+      players[1].name = newName;
+    }
+  }
+
   return {
     playRound,
     getActivePlayer,
     initialize,
+    renamePlayer,
     getBoard: board.getBoard,
   };
 }
@@ -149,6 +159,10 @@ function ScreenController() {
   const playerTurnDiv = document.querySelector('.turn');
   const boardDiv = document.querySelector('.board');
   const restartButton = document.querySelector('.restart');
+  const playerOneNameDisplay = document.querySelector('#playerOneName');
+  const playerOneNameInput = document.querySelector('#playerOne');
+  const playerTwoNameDisplay = document.querySelector('#playerTwoName');
+  const playerTwoNameInput = document.querySelector('#playerTwo');
 
   const updateTurnIndicator = () => {
     const activePlayer = game.getActivePlayer();
@@ -204,8 +218,29 @@ function ScreenController() {
     boardDiv.addEventListener('click', clickHandlerBoard);
   }
 
+  function renameHandler(e) {
+    if (e.key === "Enter") {
+      const target = e.target;
+      if (target === playerOneNameInput) {
+        const newName = playerOneNameInput.value;
+        playerOneNameDisplay.innerText = newName;
+        game.renamePlayer(1, newName);
+        updateTurnIndicator();
+      }
+      else if (target === playerTwoNameInput) {
+        const newName = playerTwoNameInput.value;
+        playerTwoNameDisplay.innerText = newName;
+        game.renamePlayer(2, newName);
+        updateTurnIndicator();
+      }
+    }
+  }
+
   boardDiv.addEventListener('click', clickHandlerBoard);
   restartButton.addEventListener('click', clickHandlerRestart);
+  playerOneNameInput.addEventListener('keypress', renameHandler);
+  playerTwoNameInput.addEventListener('keypress', renameHandler);
+
   // Initial display for the board.
   updateTurnIndicator();
   updateBoard();
