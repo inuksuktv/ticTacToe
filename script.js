@@ -3,14 +3,18 @@ function Gameboard() {
   const columns = 3;
   const board = [];
 
-  // Create a 2D array to represent the board.
-  for (let i = 0; i < rows; i++) {
-    board[i] = [];
-    for (let j = 0; j < columns; j++) {
-      // The board contains cells, defined below.
-      board[i].push(Cell());
+  const initialize = () => {
+    // Create a 2D array to represent the board.
+    for (let i = 0; i < rows; i++) {
+      board[i] = [];
+      for (let j = 0; j < columns; j++) {
+        // The board contains cells, defined below.
+        board[i].push(Cell());
+      }
     }
   }
+
+  initialize();
 
   const getBoard = () => board;
 
@@ -18,7 +22,7 @@ function Gameboard() {
     board[row][column].markCell(token);
   };
 
-  return { getBoard, claimCell };
+  return { getBoard, claimCell, initialize };
 }
 
 function Cell() {
@@ -135,10 +139,16 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     return isFull;
   }
 
+  const initialize = () => {
+    board.initialize();
+    activePlayer = players[0];
+  }
+
   return {
     playRound,
     getActivePlayer,
-    getBoard: board.getBoard
+    initialize,
+    getBoard: board.getBoard,
   };
 }
 
@@ -146,15 +156,18 @@ function ScreenController() {
   const game = GameController();
   const playerTurnDiv = document.querySelector('.turn');
   const boardDiv = document.querySelector('.board');
+  const restartButton = document.querySelector('.restart');
 
-  const updateScreen = () => {
+  const updateTurnIndicator = () => {
+    const activePlayer = game.getActivePlayer();
+    playerTurnDiv.textContent = `${activePlayer.name}'s turn`
+  }
+
+  const updateBoard = () => {
     // Clear the board.
     boardDiv.textContent = "";
 
     const board = game.getBoard();
-    const activePlayer = game.getActivePlayer();
-
-    playerTurnDiv.textContent = `${activePlayer.name}'s turn`;
 
     // Render board cells.
     board.forEach((row, rowIndex) => {
@@ -177,20 +190,33 @@ function ScreenController() {
     // Guard clause to make sure the user clicked a cell.
     if (!row) return;
 
+    let gameOver = false;
     game.playRound(row, column, (result) => {
       if (result) {
-        // Delay the alert slightly so that the screen updates before the alert is sent.
-        setTimeout(() => {
-          alert(result);
-        }, 1);
+        playerTurnDiv.textContent = result;
         boardDiv.removeEventListener('click', clickHandlerBoard);
+        gameOver = true;
       }
     });
-    updateScreen();
+    if (!gameOver) {
+      updateTurnIndicator();
+    }
+    updateBoard();
   }
-  boardDiv.addEventListener('click', clickHandlerBoard);
 
-  updateScreen();
+  function clickHandlerRestart() {
+    game.initialize();
+    updateTurnIndicator();
+    updateBoard();
+    boardDiv.removeEventListener('click', clickHandlerBoard);
+    boardDiv.addEventListener('click', clickHandlerBoard);
+  }
+
+  boardDiv.addEventListener('click', clickHandlerBoard);
+  restartButton.addEventListener('click', clickHandlerRestart);
+  // Initial display for the board.
+  updateTurnIndicator();
+  updateBoard();
 }
 
 ScreenController();
